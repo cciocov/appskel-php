@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+/**
+ * CLI Script
+ *
+ ******************************************************************************/
+require_once(dirname(__FILE__) . '/../cfg/bootstrap_cli.php');
+
+if (empty($argv[1])) {
+	die("Usage: $argv[0] <email address>\n\n");
+}
+
+$ms = new MailSender();
+
+var_dump($ms->send(array(
+	'to' => $argv[1],
+	'subject' => 'Test Message',
+	'text' => 'Testing e-mail through SendGrid.'
+)));

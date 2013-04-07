@@ -1,0 +1,182 @@
+#!/usr/bin/env php
+<?php
+/**
+ * CLI Script
+ *
+ ******************************************************************************/
+require_once(dirname(__FILE__) . '/../cfg/bootstrap_cli.php');
+
+$cmd = (isset($argv[1]) ? $argv[1] : 'help');
+if (function_exists("cmd_$cmd")) {
+	call_user_func("cmd_$cmd");
+}
+else {
+	usage();
+	exit(1);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Commands
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * check
+ */
+function cmd_check() {
+	global $argv, $CFG;
+
+	$label = (isset($argv[2]) ? $argv[2] : 'default');
+
+	_echo("Checking database connection '$label':\n");
+
+	inc_indent();
+	$db = db_connect($label);
+	dec_indent();
+
+	if ($db) {
+		_echo("\nSUCCESS!\n\n");
+	}
+	else {
+		_echo("\nFAILED!\n\n");
+	}
+}
+
+/**
+ * help
+ */
+function cmd_help() {
+	global $argv, $CMD_HELP;
+
+	// help for a specific command:
+	$cmd = (isset($argv[2]) ? $argv[2] : '');
+
+	if (!empty($cmd)) {
+		if (function_exists("cmd_$cmd")) {
+			help($cmd);
+			exit(0);
+		}
+		else {
+			echo "Command '$cmd' is unknown.\n";
+			exit(1);
+		}
+	}
+	else {
+		usage();
+		exit(0);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Support Functions
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Connect to a database server and return the DB object.
+ */
+function db_connect($label) {
+	global $CFG;
+
+	_echo("Connecting to database server using connection '$label'... ");
+
+	if (!isset($CFG['DB'][$label])) {
+		echo "failed!\n";
+		_echo("ERROR: unknown connection label '$label'.\n");
+		return null;
+	}
+
+	try {
+		$db = db::get($label);
+		echo "ok!\n";
+
+		return $db;
+	}
+	catch (Exception $e) {
+		echo "failed!\n";
+
+		_echo("ERROR: " . $e->getMessage() . "\n");
+	}
+
+	return null;
+}
+
+/**
+ * Usage.
+ */
+function usage() {
+	global $argv;
+
+	echo implode("\n", array(
+		"Usage: $argv[0] COMMAND [ARGS]",
+		"",
+		"Available commands are:",
+		"  check\t\tCheck database connection",
+		"  help\t\tGet more information on a specific command",
+		"\n"
+	));
+}
+
+/**
+ * Command help.
+ */
+function help($cmd) {
+	global $argv;
+
+	switch ($cmd) {
+	case 'check':
+		$help = array(
+			"Usage: $argv[0] check [label]",
+			"",
+			"This command will check a database connection by trying to connect to",
+			"the server and select the appropriate database, as defined in the",
+			"configuration file.",
+			"\n"
+		);
+		break;
+
+	case 'help':
+		$help = array(
+			"Usage: $argv[0] help COMMAND",
+			"",
+			"Show for information about COMMAND.",
+			"\n"
+		);
+		break;
+
+	default:
+		$help = array(
+			"No help available for command '$cmd'.",
+			""
+		);
+	}
+
+	echo implode("\n", $help);
+}
+
+/**
+ * Print messages with proper indentation.
+ */
+function _echo($msg) {
+	global $indent;
+
+	echo (isset($indent) ? $indent : '') . $msg;
+}
+
+/**
+ * Increase and decrease indentation.
+ */
+function inc_indent() {
+	global $indent;
+
+	if (!isset($indent)) $indent = '';
+	$indent .= '  ';
+}
+function dec_indent() {
+	global $indent;
+
+	if (!isset($indent)) $indent = '';
+	$indent = preg_replace('/  $/', '', $indent);
+}
