@@ -51,7 +51,7 @@ class sample_controller extends app_controller {
 	}
 
 	public function action_delete() {
-		if ($this->model->del($this->params->ids)) {
+		if ($this->model->del(array('ids' => $this->params->ids))) {
 			$n = $this->model->rows_affected();
 			$this->session()->flash(_("Successfully deleted $n record(s)."));
 		}
