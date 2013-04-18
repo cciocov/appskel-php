@@ -40,18 +40,21 @@
 			'aoColumnDefs': [
 				{ 'aTargets': [0], 'bSortable': false },
 				{
+					'mData': 'id',
 					'mRender': function(data, type, row) {
 						return '<input type="checkbox" name="ids[]" value="' + data + '">';
 					},
 					'aTargets': [0]
 				},
 				{
+					'mData': 'name',
 					'mRender': function(data, type, row) {
 						return '<a href="' + update_url + '?id=' + row[0] + '">' + data + '</a>';
 					},
 					'aTargets': [1]
 				},
 				{
+					'mData': 'created_on',
 					'mRender': function(data, type, row) {
 						return (new Date(parseInt(data) * 1000)).toString('MMM d, yyyy');
 					},
