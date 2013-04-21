@@ -32,12 +32,32 @@
 				'aaSorting': [],
 
 				// by default, don't save state:
-				'bStateSave': false,
-
-				'fnDrawCallback': function() {
-					$el.find('input [type=checkbox]').prop('checked', false);
-				}
+				'bStateSave': false
 			}, (id && typeof(dtcfg) != 'undefined' && dtcfg[id] ? dtcfg[id] : {}));
+
+			// callback when the data table is initialized:
+			var fnInitComplete = null;
+			if (typeof(cfg['fnInitComplete']) == 'function') {
+				fnInitComplete = cfg['fnInitComplete'];
+				cfg['fnInitComplete'] = function(oSettings, json) {
+					if (fnInitComplete) {
+						fnInitComplete(oSettings, json);
+					}
+				};
+			}
+
+			// callback on every draw event:
+			var fnDrawCallback = null;
+			if (typeof(cfg['fnDrawCallback']) == 'function') {
+				fnDrawCallback = cfg['fnDrawCallback'];
+			}
+			cfg['fnDrawCallback'] = function(oSettings) {
+				$el.find('input[type=checkbox]').prop('checked', false);
+
+				if (fnDrawCallback) {
+					fnDrawCallback(oSettings);
+				}
+			};
 
 			if (cfg['bServerSide']) {
 				$el.dataTable(cfg).fnSetFilteringDelay(450);
