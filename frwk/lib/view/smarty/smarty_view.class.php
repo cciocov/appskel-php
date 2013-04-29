@@ -68,6 +68,9 @@ class smarty_view {
 			'modifier', 'slug', array(&$this, 'smarty_slug')
 		);
 		$this->smarty->registerPlugin(
+			'modifier', 'json', array(&$this, 'smarty_json')
+		);
+		$this->smarty->registerPlugin(
 			'function', 'href', array(&$this, 'smarty_href')
 		);
 		$this->smarty->registerPlugin(
@@ -138,6 +141,10 @@ class smarty_view {
 		$name = preg_replace('/^\-*|\-*$/', '', $name);
 
 		return strtolower($name);
+	}
+
+	public function smarty_json($v) {
+		return json_encode($v);
 	}
 
 	public function smarty_href($params) {
