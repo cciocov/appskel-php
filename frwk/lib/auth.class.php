@@ -19,7 +19,7 @@ class auth {
 
 		$session = session::get_instance();
 		if ($session && is_array($session->user_info)) {
-			return true;
+			return $session->user_info;
 		}
 
 		if (is_null($redirect_to)) {
