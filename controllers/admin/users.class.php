@@ -67,12 +67,12 @@ class users_controller extends admin_controller {
 	 * Datatables AJAX source (for large data sets).
 	 */
 	public function action_datatables_ajax() {
-		return $this->model->datatables(
+		return $this->model->datatables(array(
 			// table columns:
-			array('id', 'email', 'username', 'status', 'created_on'),
+			'cols' => array('id', 'email', 'username', 'status', 'created_on'),
 			// searchable columns:
-			array('email', 'username', 'first_name', 'last_name')
-		);
+			'search_cols' => array('email', 'username', 'first_name', 'last_name')
+		));
 	}
 
 	//////////////////////////////////////////////////////////////////////////////

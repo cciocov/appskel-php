@@ -49,9 +49,18 @@ class app_model extends model {
 	/**
 	 * Datatables source.
 	 */
-	public function datatables($cols, $search_cols = array()) {
+	public function datatables($options) {
 		$params =& $this->frwk->req->params;
 		$data = array();
+
+		// default options:
+		$opt = array(
+			'select' => '*',
+			'from' => $this->attr('tb')
+		);
+
+		// overwrite defaults:
+		utils::array_extend($opt, $options);
 
 		// paging:
 		$limit_str = '';
@@ -62,28 +71,33 @@ class app_model extends model {
 		}
 
 		// ordering:
-		$order_str = '';
+		$order_by_str = '';
 		if ($params->iSortCol_0 !== null) {
-			$order_arr = array();
+			$order_by_arr = array();
 			for ($i = 0; $i < intval($params->iSortingCols); $i++) {
 				$col_index = intval($params->get("iSortCol_$i"));
 				if ($params->get("bSortable_$col_index") == 'true') {
 					$dir = ($params->get("sSortDir_$i") == 'asc' ? 'ASC' : 'DESC');
-					$order_arr[] = $cols[$col_index] . ' ' . $dir;
+					$order_arr[] = $opt['cols'][$col_index] . ' ' . $dir;
 				}
 			}
-			$order_str = implode(', ', $order_arr);
+			$order_by_str = implode(', ', $order_by_arr);
 		}
 
 		// filtering:
 		$where_arr = array();
 
+		if (isset($opt['where_str'])) {
+			$where_arr[] = $opt['where_str'];
+		}
+
 		$sSearch = $params->sSearch;
 		if (!empty($sSearch)) {
 			$data['search'] = $sSearch;
 			$search_arr = array();
-			for ($i = 0; $i < count($search_cols); $i++) {
-				$search_arr[] = $search_cols[$i] . " LIKE CONCAT('%', :search, '%')";
+			for ($i = 0; $i < count($opt['search_cols']); $i++) {
+				$s = $opt['search_cols'][$i] . " LIKE CONCAT('%', :search, '%')";
+				$search_arr[] = $s;
 			}
 			if (count($search_arr)) {
 				$where_arr[] = '(' . implode(' OR ', $search_arr) . ')';
@@ -92,12 +106,13 @@ class app_model extends model {
 
 		$where_str = implode(' AND ', $where_arr);
 
-		// run query:
+		// construct query:
 		$qstr = implode(' ', array(
-			"SELECT SQL_CALC_FOUND_ROWS *",
-			"FROM " . $this->attr('tb'),
+			"SELECT SQL_CALC_FOUND_ROWS $opt[select]",
+			"FROM $opt[from]",
 			(!empty($where_str) ? "WHERE $where_str" : ''),
-			(!empty($order_str) ? "ORDER BY $order_str" : ''),
+			(isset($opt['group_by_str']) ? "GROUP BY $opt[group_by_str]" : ''),
+			(!empty($order_by_str) ? "ORDER BY $order_by_str" : ''),
 			$limit_str
 		));
 
@@ -109,7 +124,11 @@ class app_model extends model {
 		);
 
 		$q = $this->query($qstr, $data);
+		$q->getall();
 		while (is_array($res = $q->getrow())) {
+			if (isset($opt['callback'])) {
+				$res = call_user_func($opt['callback'], $res);
+			}
 			$results['aaData'][] = $res;
 		}
 
@@ -120,7 +139,14 @@ class app_model extends model {
 		}
 
 		// total data set length:
-		$n = $this->db()->get_fields('COUNT(*)', $this->attr('tb'));
+		$n = $this->db()->get_fields(
+			'COUNT(*)',
+			$opt['from'],
+			trim(implode(' ', array(
+				(isset($opt['where_str']) ? $opt['where_str'] : '1'),
+				(isset($opt['group_by_str']) ? "GROUP BY $opt[group_by_str]" : '')
+			)))
+		);
 		$results['iTotalRecords'] = intval($n);
 
 		return $results;
