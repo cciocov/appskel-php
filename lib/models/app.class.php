@@ -14,29 +14,36 @@ class app_model extends model {
 			return true;
 		}
 
-		// model does not have user association, access allowed:
-		if (!$this->user_id) {
-			return true;
+		if ($this->user_id || $this->account_id) {
+			// make sure we have a user:
+			if (is_null($user_info)) {
+				$user_info = $this->frwk->session()->user_info;
+			}
+			if (!is_array($user_info)) {
+				return false;
+			}
+
+			// model has user access constraints:
+			if ($this->user_id) {
+				if (!$user_info['root_access']) {
+					if ($this->user_id != $user_info['id']) {
+						return false;
+					}
+				}
+			}
+
+			// model has account access constraints:
+			if ($this->account_id) {
+				if (!$user_info['root_access']) {
+					if ($this->account_id != $user_info['account_id']) {
+						return false;
+					}
+				}
+			}
 		}
 
-		// no user specified, get it from session:
-		if (is_null($user_info)) {
-			$user_info = $this->frwk->session()->user_info;
-		}
-
-		// no user, access denied:
-		if (!is_array($user_info)) {
-			return false;
-		}
-
-		// grant access if user has root_access or the model's user ID matches the
-		// user:
-		if ($user_info['root_access'] || $this->user_id == $user_info['id']) {
-			return true;
-		}
-
-		// access denied:
-		return false;
+		// allow access:
+		return true;
 	}
 
 	/**
