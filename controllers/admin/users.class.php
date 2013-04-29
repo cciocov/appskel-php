@@ -4,7 +4,7 @@
  *
  ******************************************************************************/
 
-class users_controller extends app_controller {
+class users_controller extends admin_controller {
 	/**
 	 * Controller attributes.
 	 * @var array
