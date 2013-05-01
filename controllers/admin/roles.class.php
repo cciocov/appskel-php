@@ -56,10 +56,25 @@ class roles_controller extends admin_controller {
 	}
 
 	public function action_delete() {
-		if ($this->model->del($this->params->ids)) {
-			$n = $this->model->rows_affected();
-			$this->session()->flash(_("Successfully deleted $n record(s)."));
+		$ids = $this->params->ids;
+		if (is_array($ids) && count($ids) > 0) {
+			$n = 0;
+			foreach ($ids as $id) {
+				$this->model->load($id);
+				if (!$this->model->exists() || !$this->model->access_allowed()) {
+					continue;
+				}
+
+				if ($this->model->delete()) {
+					$n++;
+				}
+			}
+
+			if ($n) {
+				$this->session()->flash(_("Successfully deleted $n record(s)."));
+			}
 		}
+
 		$this->redirect();
 	}
 
@@ -67,9 +82,12 @@ class roles_controller extends admin_controller {
 	 * Datatables AJAX source (for large data sets).
 	 */
 	//public function action_datatables_ajax() {
-	//	return $this->model->datatables(
-	//		array('id', 'name', 'description', 'created_on')
-	//	);
+	//	return $this->model->datatables(array(
+	//		// table columns:
+	//		'cols' => array('id', 'name', 'created_on'),
+	//		// searchable columns:
+	//		'search_cols' => array('name')
+	//	));
 	//}
 
 	//////////////////////////////////////////////////////////////////////////////

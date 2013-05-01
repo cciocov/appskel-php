@@ -51,10 +51,25 @@ class sample_controller extends app_controller {
 	}
 
 	public function action_delete() {
-		if ($this->model->del(array('ids' => $this->params->ids))) {
-			$n = $this->model->rows_affected();
-			$this->session()->flash(_("Successfully deleted $n record(s)."));
+		$ids = $this->params->ids;
+		if (is_array($ids) && count($ids) > 0) {
+			$n = 0;
+			foreach ($ids as $id) {
+				$this->model->load($id);
+				if (!$this->model->exists() || !$this->model->access_allowed()) {
+					continue;
+				}
+
+				if ($this->model->delete()) {
+					$n++;
+				}
+			}
+
+			if ($n) {
+				$this->session()->flash(_("Successfully deleted $n record(s)."));
+			}
 		}
+
 		$this->redirect();
 	}
 
@@ -62,12 +77,12 @@ class sample_controller extends app_controller {
 	 * Datatables AJAX source (for large data sets).
 	 */
 	//public function action_datatables_ajax() {
-	//	return $this->model->datatables(
+	//	return $this->model->datatables(array(
 	//		// table columns:
-	//		array('id', 'name', 'created_on'),
+	//		'cols' => array('id', 'name', 'created_on'),
 	//		// searchable columns:
-	//		array('name')
-	//	);
+	//		'search_cols' => array('name')
+	//	));
 	//}
 
 	//////////////////////////////////////////////////////////////////////////////
