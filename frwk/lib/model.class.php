@@ -413,10 +413,12 @@ class model {
 	/**
 	 * Delete.
 	 */
-	public function delete() {
-		if (!$this->require_instance()) return false;
+	public function delete($id = null) {
+		if (!($id = $this->require_id($id))) return false;
 
-		$this->query("DELETE FROM {$this->attr('tb')} WHERE id = '{$this->id}'");
+		$this->query("DELETE FROM {$this->attr('tb')} WHERE id = :id", array(
+			'id' => $id
+		));
 		$this->clear();
 
 		return true;
