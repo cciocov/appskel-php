@@ -26,8 +26,18 @@ class api_sendgrid {
 	}
 
 	/**
-	 * Send an e-mail. The following keys are required in $params: to, from,
-	 * subject, text or html.
+	 * Send a single e-mail.
+	 *
+	 * $params = array(
+	 *	'to' => 'Some One <some.one@example.com>',
+	 *	'from' => 'sender@example.com',
+	 *	'from_name' => 'Sender',
+	 *	'subject' => 'Subject Line',
+	 *	'text' => 'Text version.',
+	 *	'html' => '<b>HTML</b> version.'
+	 * );
+	 *
+	 * The required fields are: to, from, either text or html.
 	 */
 	public function send($params) {
 		global $CFG;
@@ -78,21 +88,5 @@ class api_sendgrid {
 
 		// send the message:
 		return $this->sendgrid->smtp->send($mail);
-	}
-
-	/**
-	 * Send an e-mail from a view.
-	 */
-	public function sendView($params, $view, $data = array()) {
-		global $CFG;
-
-		if (is_file("$CFG[ROOT_DIR]/views/emails/$view" . '_html.tpl')) {
-			$params['html'] = view::get()->render("emails/$view" . '_html', $data);
-		}
-		if (is_file("$CFG[ROOT_DIR]/views/emails/$view" . '_text.tpl')) {
-			$params['text'] = view::get()->render("emails/$view" . '_text', $data);
-		}
-
-		return $this->send($params);
 	}
 }
