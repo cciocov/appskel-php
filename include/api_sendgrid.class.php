@@ -1,11 +1,11 @@
 <?php
 /**
- * MailSender.class.php
+ * api_sendgrid.class.php
  * 
  ******************************************************************************/
 require_once(dirname(__FILE__) . '/vendors/sendgrid/SendGrid_loader.php');
 
-class MailSender {
+class api_sendgrid {
 	/**
 	 * SendGrid object.
 	 * @var object
@@ -46,8 +46,8 @@ class MailSender {
 		if (isset($params['from'])) {
 			$mail->setFrom($params['from']);
 		}
-		elseif (isset($CFG['MAIL']['from'])) {
-			$mail->setFrom($CFG['MAIL']['from']);
+		elseif (isset($CFG['EMAIL']['from'])) {
+			$mail->setFrom($CFG['EMAIL']['from']);
 		}
 		else {
 			return false;
@@ -57,8 +57,8 @@ class MailSender {
 		if (isset($params['from_name'])) {
 			$mail->setFromName($params['from_name']);
 		}
-		elseif (isset($CFG['MAIL']['from_name'])) {
-			$mail->setFromName($CFG['MAIL']['from_name']);
+		elseif (isset($CFG['EMAIL']['from_name'])) {
+			$mail->setFromName($CFG['EMAIL']['from_name']);
 		}
 
 		// subject:

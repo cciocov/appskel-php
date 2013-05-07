@@ -23,7 +23,7 @@
 	<br>
 	<p>{'Something went wrong. The link you are trying to access may be broken or expired. For any assistance please contact our support.'|i18n}</p>
 	<br>
-	<a href="mailto: {$CFG.SUPPORT_EMAIL}" class="btn btn-danger">{'Contact Support'|i18n}</a>
+	<a href="mailto: {$CFG.EMAIL.support_email}" class="btn btn-danger">{'Contact Support'|i18n}</a>
 </div>
 {/if}
 {/block}

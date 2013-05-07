@@ -4,20 +4,27 @@
  *
  ******************************************************************************/
 
-/**
- * E-mail
- */
-$CFG['MAIL'] = array(
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// E-Mail Settings
+//
+////////////////////////////////////////////////////////////////////////////////
+
+$CFG['EMAIL'] = array(
+	'provider_name' => 'api_sendgrid',
+
 	'from' => 'support@example.com',
-	'from_name' => 'Support'
+	'from_name' => 'Support',
+
+	'support_email' => 'support@example.com'
 );
 
-// support email address:
-$CFG['SUPPORT_EMAIL'] = 'support@example.com';
-
 /**
- * SendGrid
+ * E-Mail Providers
  */
+
+// SendGrid:
 $CFG['SENDGRID'] = array(
 	'username' => '',
 	'password' => ''

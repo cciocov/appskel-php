@@ -161,8 +161,8 @@ class user_model extends app_model {
 	public function send_welcome_email($id = null) {
 		if (!$this->require_instance($id)) return false;
 
-		$ms = new MailSender();
-		$ms->sendView(
+		$email_sender = new email_sender();
+		$email_sender->sendView(
 			array(
 				'to' => "{$this->name} <{$this->email}>",
 				'subject' => 'Welcome!'
@@ -199,8 +199,8 @@ class user_model extends app_model {
 			true
 		);
 
-		$ms = new MailSender();
-		$ms->sendView(
+		$email_sender = new email_sender();
+		$email_sender->sendView(
 			array(
 				'to' => "{$this->name} <{$this->email}>",
 				'subject' => 'Confirm E-mail'
@@ -239,8 +239,8 @@ class user_model extends app_model {
 			true
 		);
 
-		$ms = new MailSender();
-		$ms->sendView(
+		$email_sender = new email_sender();
+		$email_sender->sendView(
 			array(
 				'to' => "{$this->name} <{$this->email}>",
 				'subject' => 'Reset Password'
@@ -278,8 +278,8 @@ class user_model extends app_model {
 			true
 		);
 
-		$ms = new MailSender();
-		$ms->sendView(
+		$email_sender = new email_sender();
+		$email_sender->sendView(
 			array(
 				'to' => $email,
 				'subject' => 'Confirm New E-mail'
