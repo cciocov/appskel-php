@@ -79,5 +79,5 @@ function tb($name) {
 	global $CFG;
 
 	$cfgname = 'DBTABLE_' . strtoupper(preg_replace('/[^a-z0-9]/i', '', $name));
-	return (isset($CFG[$cfgname]) ? $CFG[$cfgname] : '');
+	return (isset($CFG[$cfgname]) ? $CFG[$cfgname] : $name);
 }
