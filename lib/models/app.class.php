@@ -78,7 +78,7 @@ class app_model extends model {
 				$col_index = intval($params->get("iSortCol_$i"));
 				if ($params->get("bSortable_$col_index") == 'true') {
 					$dir = ($params->get("sSortDir_$i") == 'asc' ? 'ASC' : 'DESC');
-					$order_arr[] = $opt['cols'][$col_index] . ' ' . $dir;
+					$order_by_arr[] = $opt['cols'][$col_index] . ' ' . $dir;
 				}
 			}
 			$order_by_str = implode(', ', $order_by_arr);
