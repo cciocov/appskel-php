@@ -6,6 +6,8 @@
  ******************************************************************************/
 require_once(dirname(__FILE__) . '/../cfg/bootstrap_cli.php');
 
+$argv = parseArgs($argv);
+
 $cmd = (isset($argv[1]) ? $argv[1] : 'help');
 if (function_exists("cmd_$cmd")) {
 	call_user_func("cmd_$cmd");
@@ -27,19 +29,15 @@ else {
 function cmd_check() {
 	global $argv, $CFG;
 
-	$label = (isset($argv[2]) ? $argv[2] : 'default');
-
-	_echo("Checking database connection '$label':\n");
-
-	inc_indent();
-	$db = db_connect($label);
-	dec_indent();
-
-	if ($db) {
-		_echo("\nSUCCESS!\n\n");
+	if (isset($argv[2])) {
+		$labels = array($argv[2]);
 	}
 	else {
-		_echo("\nFAILED!\n\n");
+		$labels = array_keys($CFG['DB']);
+	}
+
+	foreach ($labels as $label) {
+		db_check($label);
 	}
 }
 
@@ -68,11 +66,172 @@ function cmd_help() {
 	}
 }
 
+/**
+ * setup
+ */
+function cmd_setup() {
+	global $argv, $CFG;
+
+	if (isset($argv[2])) {
+		$labels = array($argv[2]);
+	}
+	else {
+		$labels = array_keys($CFG['DB']);
+	}
+
+	foreach ($labels as $label) {
+		db_setup($label);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Support Functions
 //
 ////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Run an external command.
+ */
+function run($cmd, &$output = null) {
+	exec("$cmd 2>&1", $output, $ret);
+	return $ret;
+}
+
+/**
+ * Run a command and display the outcome. Exit in case the command fails.
+ */
+function run_inline($description, $cmd) {
+	_echo($description, false);
+	$ret = run($cmd, $output);
+	if ($ret === 0) {
+		echo "ok!\n";
+	}
+	else {
+		echo "failed!\n";
+		_echo($output);
+	}
+	return $ret;
+}
+
+/**
+ * Get configuration settings for a label.
+ */
+function get_cfg($label) {
+	global $CFG;
+
+	if (isset($CFG['DB'][$label])) {
+		return $CFG['DB'][$label];
+	}
+	else {
+		_echo("ERROR: unknown connection label '$label'.\n");
+		show_labels();
+		exit(1);
+	}
+}
+
+/**
+ * Show available configuration labels.
+ */
+function show_labels() {
+	global $CFG;
+
+	$labels = array_keys($CFG['DB']);
+
+	_echo("Defined labels are:");
+	inc_indent();
+	foreach ($labels as $label) {
+		_echo($label);
+	}
+	echo "\n";
+	dec_indent();
+}
+
+/**
+ * Check a database connection.
+ */
+function db_check($label) {
+	_echo("Checking database connection '$label':");
+	inc_indent();
+
+	$cfg = get_cfg($label);
+
+	$cmd = "mysql -h $cfg[host] -u $cfg[user]";
+	if (!empty($cfg['pass'])) {
+		$cmd .= " -p$cfg[pass]";
+	}
+
+	if (run_inline('Connecting to server... ', "$cmd -e ''")) {
+		dec_indent();
+		return;
+	}
+	if (run_inline('Selecting database... ', "$cmd -e 'use $cfg[name]'")) {
+		dec_indent();
+		return;
+	}
+
+	dec_indent();
+}
+
+/**
+ * Setup a database connection.
+ */
+function db_setup($label) {
+	global $argv;
+
+	_echo("Running database setup for connection '$label':");
+	inc_indent();
+
+	$cfg = get_cfg($label);
+
+	// check if setup already done:
+	$cmd = implode(' ', array(
+		"mysql -h $cfg[host] -u $cfg[user]",
+		(!empty($cfg['pass']) ? "-p$cfg[pass]" : ''),
+		"-e '' $cfg[name]"
+	));
+	if (0 === run($cmd)) {
+		_echo("Database setup is already done.");
+		dec_indent();
+		return;
+	}
+
+	// if user specified through options, use it to connect to the DB:
+	if (isset($argv['user'])) {
+		$user = $argv['user'];
+		$pass = (isset($argv['pass']) ? $argv['pass'] : '');
+	}
+	else {
+		$user = $cfg['user'];
+		$pass = $cfg['pass'];
+	}
+
+	$cmd = "mysql -h $cfg[host] -u $user";
+	if (!empty($pass)) {
+		$cmd .= " -p$pass";
+	}
+
+	// check if database is there, otherwise create it:
+	if (0 !== run("$cmd -e 'USE $cfg[name]'")) {
+		$e = "CREATE DATABASE $cfg[name]";
+		if (run_inline('Creating database... ', "$cmd -e '$e'")) {
+			dec_indent();
+			return;
+		}
+	}
+
+	// create the database user:
+	$e = "GRANT ALL ON $cfg[name].* TO '$cfg[user]'@'localhost'";
+	if (!empty($cfg['pass'])) {
+		$e .= " IDENTIFIED BY '$cfg[pass]'";
+	}
+	if (run_inline('Creating database user... ', "$cmd -e \"$e\"")) {
+		dec_indent();
+		return;
+	}
+
+	dec_indent();
+}
 
 /**
  * Connect to a database server and return the DB object.
@@ -110,11 +269,13 @@ function usage() {
 	global $argv;
 
 	echo implode("\n", array(
+		"",
 		"Usage: $argv[0] COMMAND [ARGS]",
 		"",
 		"Available commands are:",
 		"  check\t\tCheck database connection",
-		"  help\t\tGet more information on a specific command",
+		"  setup\t\tSetup database connection",
+		"  help\t\tGet detailed help for a command",
 		"\n"
 	));
 }
@@ -128,26 +289,42 @@ function help($cmd) {
 	switch ($cmd) {
 	case 'check':
 		$help = array(
-			"Usage: $argv[0] check [label]",
 			"",
-			"This command will check a database connection by trying to connect to",
-			"the server and select the appropriate database, as defined in the",
-			"configuration file.",
+			"Usage: $argv[0] check [LABEL]",
+			"",
+			"Check all database connections defined in \$CFG['DB'] or just the one",
+			"identified by LABEL.",
 			"\n"
 		);
 		break;
 
 	case 'help':
 		$help = array(
+			"",
 			"Usage: $argv[0] help COMMAND",
 			"",
-			"Show for information about COMMAND.",
+			"Show more information about COMMAND.",
+			"\n"
+		);
+		break;
+
+	case 'setup':
+		$help = array(
+			"",
+			implode(' ', array(
+				"Usage: $argv[0] setup [LABEL]",
+				"[--user=<admin user>] [--pass=<admin pass>]",
+			)),
+			"",
+			"Setup all database connections as defined in \$CFG['DB'] or just the",
+			"one identified by LABEL.",
 			"\n"
 		);
 		break;
 
 	default:
 		$help = array(
+			"",
 			"No help available for command '$cmd'.",
 			""
 		);
@@ -159,10 +336,16 @@ function help($cmd) {
 /**
  * Print messages with proper indentation.
  */
-function _echo($msg) {
+function _echo($msg, $newline = true) {
 	global $indent;
 
-	echo (isset($indent) ? $indent : '') . $msg;
+	if (!is_array($msg)) {
+		$msg = array($msg);
+	}
+
+	foreach ($msg as $line) {
+		echo (isset($indent) ? $indent : '') . $line . ($newline ? "\n" : '');
+	}
 }
 
 /**
@@ -179,4 +362,44 @@ function dec_indent() {
 
 	if (!isset($indent)) $indent = '';
 	$indent = preg_replace('/  $/', '', $indent);
+}
+
+/**
+ * parseArgs Command Line Interface (CLI) utility function.
+ * @author Patrick Fisher <patrick@pwfisher.com>
+ * @see http://github.com/pwfisher/CommandLine.php
+ */
+function parseArgs($argv = null) {
+	$argv = ($argv ? $argv : $_SERVER['argv']);
+	$o = array(array_shift($argv));
+	foreach ($argv as $a) {
+		if (substr($a, 0, 2) == '--') {
+			$eq = strpos($a, '=');
+			if ($eq !== false) {
+				$o[substr($a, 2, $eq - 2)] = substr($a, $eq + 1);
+			}
+			else {
+				$k = substr($a, 2);
+				if (!isset($o[$k])) {
+					$o[$k] = true;
+				}
+			}
+		}
+		else if (substr($a, 0, 1) == '-') {
+			if (substr($a, 2, 1) == '=') {
+				$o[substr($a, 1, 1)] = substr($a, 3);
+			}
+			else {
+				foreach (str_split(substr($a, 1)) as $k) {
+					if (!isset($o[$k])) {
+						$o[$k] = true;
+					}
+				}
+			}
+		}
+		else {
+			$o[] = $a;
+		}
+	}
+	return $o;
 }
