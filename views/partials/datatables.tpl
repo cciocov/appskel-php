@@ -81,7 +81,10 @@
 		$instances.closest('form').find('.btn-danger').click(function(e) {
 			if (confirm("{'Are you sure you want to delete selected records?'|i18n}")) {
 				$(e.target).closest('form').submit();
+				return true;
 			}
+
+			return false;
 		});
 	});
 </script>
