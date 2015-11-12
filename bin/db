@@ -24,6 +24,30 @@ else {
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
+ * info
+ */
+function cmd_info() {
+  global $argv, $CFG;
+
+  if (count($argv) != 4) {
+    help('info');
+    exit(1);
+  }
+
+  if (!isset($CFG['DB'][$argv[2]])) {
+    echo "Database connection '$argv[2]' is not defined in configuration.\n";
+    exit(1);
+  }
+
+  if (!isset($CFG['DB'][$argv[2]][$argv[3]])) {
+    echo "Property '$argv[3] is not defined for connection '$argv[2]'.\n";
+    exit(1);
+  }
+
+  echo $CFG['DB'][$argv[2]][$argv[3]] . "\n";
+}
+
+/**
  * check
  */
 function cmd_check() {
@@ -273,6 +297,7 @@ function usage() {
 		"Usage: $argv[0] COMMAND [ARGS]",
 		"",
 		"Available commands are:",
+		"  info\t\tPrint database connection details",
 		"  check\t\tCheck database connection",
 		"  setup\t\tSetup database connection",
 		"  help\t\tGet detailed help for a command",
@@ -287,6 +312,16 @@ function help($cmd) {
 	global $argv;
 
 	switch ($cmd) {
+	case 'info':
+		$help = array(
+			"",
+			"Usage: $argv[0] info <LABEL> <name|user|pass>",
+			"",
+			"Print database details for connection identified by LABEL.",
+			"\n"
+		);
+		break;
+
 	case 'check':
 		$help = array(
 			"",

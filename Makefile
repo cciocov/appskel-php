@@ -19,6 +19,12 @@ chmod:
 # local configuration files:
 cfg: $(CWD)/cfg/env.php $(CWD)/cfg/local.php
 
+# database reset:
+dbreset:
+	@@for i in $(CWD)/db.create/*.sql; \
+		do MYSQL_PWD=`bin/db info default pass` mysql -u`bin/db info default user` `bin/db info default name` < $$i; \
+		done;
+
 $(CWD)/cfg/%:
 	@@echo "Copying [$(CWD)/skel/$@ -> ./$@]"
 	@@cp $(CWD)/skel/$@ ./$@
