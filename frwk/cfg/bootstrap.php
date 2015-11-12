@@ -81,3 +81,12 @@ function tb($name) {
 	$cfgname = 'DBTABLE_' . strtoupper(preg_replace('/[^a-z0-9]/i', '', $name));
 	return (isset($CFG[$cfgname]) ? $CFG[$cfgname] : $name);
 }
+
+/**
+ * i18n support.
+ */
+if (!function_exists('_')) {
+  function _($msg) {
+    return $msg;
+  }
+}

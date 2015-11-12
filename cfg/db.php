@@ -7,9 +7,9 @@
 // database connections:
 $CFG['DB'] = array(
 	'default' => array(
-		'name' => '',
-		'user' => '',
-		'pass' => '',
+		'name' => 'appskel',
+		'user' => 'appskel',
+		'pass' => 'appskel',
 		'host' => 'localhost',
 		'type' => 'mysql'
 	)
