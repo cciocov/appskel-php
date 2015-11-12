@@ -9,4 +9,4 @@ CREATE TABLE role (
 
 	created_on int unsigned not null default 0,
 	updated_on int unsigned not null default 0
-);
+) DEFAULT CHARSET=utf8;

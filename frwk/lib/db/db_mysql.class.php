@@ -37,7 +37,7 @@ class db_mysql {
 	 * @param string $dbhost
 	 */
 	public function __construct($dbname, $dbuser, $dbpass, $dbhost = 'localhost') {
-		$dsn = "mysql:dbname=$dbname;host=$dbhost";
+		$dsn = "mysql:dbname=$dbname;host=$dbhost;charset=utf8";
 		$this->dbh = new PDO($dsn, $dbuser, $dbpass);
 		$this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	}

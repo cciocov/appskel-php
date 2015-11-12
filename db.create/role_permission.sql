@@ -4,4 +4,4 @@ CREATE TABLE role_permission (
 	permission varchar(32) not null default '',
 
 	primary key (role_id, permission)
-);
+) DEFAULT CHARSET=utf8;

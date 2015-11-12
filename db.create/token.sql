@@ -15,4 +15,4 @@ CREATE TABLE token (
 
 	key (user_id),
 	unique key (skey)
-);
+) DEFAULT CHARSET=utf8;

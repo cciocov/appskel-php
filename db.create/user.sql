@@ -22,4 +22,4 @@ CREATE TABLE user (
 
 	unique key (username),
 	unique key (email)
-);
+) DEFAULT CHARSET=utf8;
