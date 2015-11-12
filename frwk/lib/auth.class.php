@@ -96,7 +96,7 @@ class auth {
 	/**
 	 * Get system permissions.
 	 */
-	public function get_system_permission_list($allowed = null, $flat = false) {
+	public static function get_system_permission_list($allowed = null, $flat = false) {
 		global $CFG;
 
 		$permissions = array();
