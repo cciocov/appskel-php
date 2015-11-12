@@ -3,7 +3,7 @@ CREATE TABLE role (
 	id int unsigned not null auto_increment primary key,
 
 	name varchar(32) not null default '',
-	description text not null default '',
+	description text,
 	
 	star_permission tinyint unsigned not null default 0,
 
