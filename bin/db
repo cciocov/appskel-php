@@ -108,6 +108,35 @@ function cmd_setup() {
 	}
 }
 
+/**
+ * console
+ */
+function cmd_console() {
+  global $argv, $CFG;
+
+  $label = (isset($argv[2]) ? $argv[2] : 'default');
+
+  if (!isset($CFG['DB'][$label])) {
+    echo "Database connection '$label' is not defined in configuration.\n";
+    exit(1);
+  }
+
+  $cfg = $CFG['DB'][$label];
+  $cmd = "MYSQL_PWD=$cfg[pass] mysql -u$cfg[user] $cfg[name]";
+
+  $pipes = array();
+  $descriptors = array(
+    0 => array('file', 'php://stdin', 'r'),
+    1 => array('file', 'php://stdout', 'w'),
+    2 => array('file', '/dev/null', 'w')
+  );
+
+  $process = proc_open($cmd, $descriptors, $pipes);
+  if (is_resource($process)) {
+    $return_value = proc_close($process);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Support Functions
@@ -297,6 +326,7 @@ function usage() {
 		"Usage: $argv[0] COMMAND [ARGS]",
 		"",
 		"Available commands are:",
+		"  console\tConnect to MySQL console",
 		"  info\t\tPrint database connection details",
 		"  check\t\tCheck database connection",
 		"  setup\t\tSetup database connection",
@@ -312,6 +342,16 @@ function help($cmd) {
 	global $argv;
 
 	switch ($cmd) {
+	case 'console':
+		$help = array(
+			"",
+			"Usage: $argv[0] console [LABEL=default]",
+			"",
+			"Connect to MySQL console for connection identified by LABEL.",
+			"\n"
+		);
+		break;
+
 	case 'info':
 		$help = array(
 			"",
