@@ -136,8 +136,15 @@ class model {
 	 * Get a field.
 	 */
 	public function __get($name) {
-		return $this->get($name);
+		return $this->get(true, $name);
 	}
+
+  /**
+   * Check if a field is set.
+   */
+  public function __isset($name) {
+    return (isset($this->rec_data[$name]) || isset($this->new_data[$name]));
+  }
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
