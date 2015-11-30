@@ -151,4 +151,31 @@ class app_model extends model {
 
 		return $results;
 	}
+
+  /**
+   * Get the number of records with specific properties.
+   */
+  public static function get_count($params = array()) {
+    $model_class = get_called_class();
+    $model = new $model_class();
+    $tb = $model->attr('tb');
+
+    $where_arr = array();
+    foreach ($params as $field => $value) {
+      $where_arr[] = "$field = :$field";
+    }
+    $where_str = implode(' AND ', $where_arr);
+
+    return $model->db()->get_fields('COUNT(*)', $tb, $where_str, $params);
+  }
+
+	/**
+	 * Get records in an "opt" form (i.e.: list of key => value pairs).
+	 */
+	public static function get_opt($key='id', $value='name', $where_str='', $data=array()) {
+    $model_class = get_called_class();
+    $model = new $model_class();
+
+    return $model->opt($key, $value, $where_str, $data);
+  }
 }
