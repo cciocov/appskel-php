@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 $CFG['EMAIL'] = array(
-	'provider_name' => 'api_sendgrid',
+	'provider_name' => 'api_mandrill',
 
 	'from' => 'support@example.com',
 	'from_name' => 'Support',
@@ -23,6 +23,11 @@ $CFG['EMAIL'] = array(
 /**
  * E-Mail Providers
  */
+
+// Mandrill:
+$CFG['MANDRILL'] = array(
+  'key' => ''
+);
 
 // SendGrid:
 $CFG['SENDGRID'] = array(
