@@ -7,10 +7,10 @@
 // database connections:
 $CFG['DB'] = array(
 	'default' => array(
-		'name' => (isset($_ENV['MYSQL_DATABASE']) ? $_ENV['MYSQL_DATABASE'] : 'appskel'),
-		'user' => (isset($_ENV['MYSQL_USER']) ? $_ENV['MYSQL_USER'] : 'appskel'),
-		'pass' => (isset($_ENV['MYSQL_PASSWORD']) ? $_ENV['MYSQL_PASSWORD'] : 'appskel'),
-		'host' => (isset($_ENV['MYSQL_HOSTNAME']) ? $_ENV['MYSQL_HOSTNAME'] : 'localhost'),
+		'name' => 'appskel',
+		'user' => 'appskel',
+		'pass' => 'appskel',
+		'host' => 'localhost',
 		'type' => 'mysql'
 	)
 );
