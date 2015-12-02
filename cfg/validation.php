@@ -41,13 +41,13 @@ $CFG['VALIDATION'] = array(
 
 	// change password form (on profile page):
 	'change_password' => array(
+		'current_password' => array(
+			'required'
+		),
 		'password' => array(
 			'required'
 		),
-		'new_password' => array(
-			'required'
-		),
-		'new_password_retype' => array(
+		'password_retype' => array(
 			'required'
 		)
 	)
